@@ -1,0 +1,65 @@
+name: bedrock-benchmark
+
+# Manual run: Actions -> bedrock-benchmark -> Run workflow.
+# Needs repository secrets AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+# (IAM user with docs/bedrock-eval-iam-policy.json) and Bedrock model access
+# enabled for the two models below in the chosen region.
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: AWS region with Bedrock model access
+        default: us-east-1
+      primary_model:
+        description: Model that writes SQL
+        default: us.anthropic.claude-sonnet-4-5-20250929-v1:0
+      fallback_model:
+        description: Model for planning/answers and fallback
+        default: us.amazon.nova-pro-v1:0
+      limit:
+        description: Number of questions (0 = all 150)
+        default: "0"
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ inputs.region }}
+      BANK_AGENT_LLM: bedrock
+      BEDROCK_PRIMARY_MODEL: ${{ inputs.primary_model }}
+      BEDROCK_FALLBACK_MODEL: ${{ inputs.fallback_model }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Check AWS secrets are set
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "::error::Add AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY under Settings -> Secrets and variables -> Actions"
+            exit 1
+          fi
+      - name: Install
+        run: pip install -e ".[local,eval]"
+      - name: Build sample warehouse
+        run: python -m bank_agent.cli build
+      - name: Run benchmark against Bedrock
+        run: python eval/run_eval.py --limit ${{ inputs.limit }}
+      - name: Publish result table to the run summary
+        if: always()
+        run: |
+          f=$(ls -t eval/results/bedrock-*.md 2>/dev/null | head -1)
+          if [ -n "$f" ]; then cat "$f" >> "$GITHUB_STEP_SUMMARY"; else echo "No results produced" >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bedrock-benchmark-results
+          path: eval/results/
