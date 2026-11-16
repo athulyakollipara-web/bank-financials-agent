@@ -31,3 +31,18 @@ jobs:
         run: python eval/run_eval.py --min-accuracy 1.0
       - name: Retrieval evaluation
         run: python eval/retrieval_eval.py
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build local demo image (Spark + sample warehouse + API)
+        run: docker build -t bank-financials-agent .
+      - name: Smoke test the API container
+        run: |
+          docker run -d -p 8000:8000 --name api bank-financials-agent
+          for i in $(seq 1 30); do curl -sf localhost:8000/health && break; sleep 2; done
+          curl -sf localhost:8000/health
+          curl -sf localhost:8000/kpis | head -c 300
+      - name: Build Lambda image
+        run: docker build -f Dockerfile.lambda -t bank-financials-agent-lambda .
