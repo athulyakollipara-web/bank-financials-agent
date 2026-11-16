@@ -1,6 +1,6 @@
 # Bank Financials Analyst Agent
 
-[!\[ci](https://github.com/athulyakollipara-web/bank-financials-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/{{GITHUB_USER}}/bank-financials-agent/actions/workflows/ci.yml)
+[![ci](https://github.com/athulyakollipara-web/bank-financials-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/athulyakollipara-web/bank-financials-agent/actions/workflows/ci.yml)
 !\[python](https://img.shields.io/badge/python-3.11%2B-blue) !\[aws](https://img.shields.io/badge/AWS-Bedrock%20%7C%20Athena%20%7C%20Glue-orange)
 
 Ask plain-English questions about US bank financials and get answers backed by validated SQL:
