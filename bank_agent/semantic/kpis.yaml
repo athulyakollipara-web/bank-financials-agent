@@ -1,0 +1,114 @@
+# Governed KPI definitions. The agent must compute KPIs with these exact
+# expressions instead of inventing its own formulas.
+# Expressions reference the fact table alias `f` (fact_bank_quarter).
+# Amounts are in $ thousands, as reported in call reports.
+
+kpis:
+  - name: net_interest_margin
+    label: Net interest margin (annualized)
+    synonyms: [NIM, margin, interest margin, spread]
+    description: Quarterly net interest income annualized, divided by earning assets.
+    sql: "(f.net_interest_income * 4.0) / NULLIF(f.earning_assets, 0)"
+    unit: ratio
+    good_direction: higher
+
+  - name: efficiency_ratio
+    label: Efficiency ratio
+    synonyms: [cost to income, cost-income ratio, operating efficiency, overhead ratio]
+    description: Noninterest expense divided by total revenue (net interest income plus noninterest income). Lower is better.
+    sql: "f.noninterest_expense / NULLIF(f.net_interest_income + f.noninterest_income, 0)"
+    unit: ratio
+    good_direction: lower
+
+  - name: return_on_assets
+    label: Return on assets (annualized)
+    synonyms: [ROA, profitability]
+    description: Quarterly net income annualized, divided by total assets.
+    sql: "(f.net_income * 4.0) / NULLIF(f.total_assets, 0)"
+    unit: ratio
+    good_direction: higher
+
+  - name: return_on_equity
+    label: Return on equity (annualized)
+    synonyms: [ROE, shareholder return]
+    description: Quarterly net income annualized, divided by equity capital.
+    sql: "(f.net_income * 4.0) / NULLIF(f.equity_capital, 0)"
+    unit: ratio
+    good_direction: higher
+
+  - name: loan_to_deposit_ratio
+    label: Loan-to-deposit ratio
+    synonyms: [LDR, loan to deposit, liquidity, loans to deposits]
+    description: Total loans divided by total deposits.
+    sql: "f.total_loans / NULLIF(f.total_deposits, 0)"
+    unit: ratio
+    good_direction: neutral
+
+  - name: tier1_capital_ratio
+    label: Tier 1 capital ratio
+    synonyms: [tier 1, capital ratio, capital adequacy, CET1]
+    description: Tier 1 capital divided by risk-weighted assets.
+    sql: "f.tier1_capital / NULLIF(f.risk_weighted_assets, 0)"
+    unit: ratio
+    good_direction: higher
+
+  - name: npl_ratio
+    label: Noncurrent loan ratio
+    synonyms: [NPL, nonperforming loans, bad loans, asset quality, credit quality]
+    description: Noncurrent (90+ days past due or nonaccrual) loans divided by total loans.
+    sql: "f.noncurrent_loans / NULLIF(f.total_loans, 0)"
+    unit: ratio
+    good_direction: lower
+
+  - name: equity_to_assets
+    label: Equity-to-assets ratio
+    synonyms: [leverage, equity ratio]
+    description: Equity capital divided by total assets.
+    sql: "f.equity_capital / NULLIF(f.total_assets, 0)"
+    unit: ratio
+    good_direction: higher
+
+tables:
+  dim_bank:
+    description: One row per bank (FDIC-insured institution).
+    columns:
+      cert: FDIC certificate number, unique bank identifier. Join key to fact_bank_quarter.
+      bank_name: Legal name of the bank.
+      city: Headquarters city.
+      state: Two-letter US state code of the headquarters, e.g. MA, CA, NY.
+      charter_class: FDIC charter class code (N, SM, NM, SB).
+      asset_size_bucket: "Size band by latest total assets: under_1b, 1b_to_10b, over_10b."
+  fact_bank_quarter:
+    description: One row per bank per quarter-end call report. Amounts in $ thousands.
+    columns:
+      cert: FDIC certificate number. Join key to dim_bank.
+      report_date: Quarter-end date (DATE), e.g. DATE '2025-12-31'.
+      quarter: Quarter label like '2025Q4'.
+      total_assets: Total assets.
+      total_deposits: Total deposits.
+      total_loans: Net loans and leases.
+      net_income: Net income for the quarter.
+      equity_capital: Total equity capital.
+      net_interest_income: Net interest income for the quarter.
+      noninterest_income: Noninterest income for the quarter.
+      noninterest_expense: Noninterest expense for the quarter.
+      earning_assets: Total earning assets.
+      tier1_capital: Tier 1 capital.
+      risk_weighted_assets: Risk-weighted assets.
+      noncurrent_loans: Loans 90+ days past due or on nonaccrual.
+
+glossary:
+  - term: latest quarter
+    meaning: The most recent quarter in the data. Use (SELECT MAX(report_date) FROM fact_bank_quarter).
+  - term: quarter over quarter
+    meaning: Compare a quarter with the immediately preceding quarter for the same bank (use LAG over report_date partitioned by cert).
+  - term: year over year
+    meaning: Compare a quarter with the same quarter one year earlier for the same bank.
+  - term: community bank
+    meaning: Banks with asset_size_bucket = 'under_1b'.
+  - term: regional bank
+    meaning: Banks with asset_size_bucket = '1b_to_10b'.
+  - term: large bank
+    meaning: Banks with asset_size_bucket = 'over_10b'.
+  - term: deposit growth
+    meaning: Percent change in total_deposits between two quarters.

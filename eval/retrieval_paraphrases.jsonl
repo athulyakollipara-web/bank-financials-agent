@@ -1,0 +1,20 @@
+{"question": "How much are banks earning on their interest-bearing assets after paying depositors?", "kpi": "net_interest_margin"}
+{"question": "Which lenders make the widest spread between loan yields and funding costs?", "kpi": "net_interest_margin"}
+{"question": "Show me banks whose interest income relative to earning assets is shrinking", "kpi": "net_interest_margin"}
+{"question": "How much does each bank spend to generate a dollar of revenue?", "kpi": "efficiency_ratio"}
+{"question": "Which banks have the leanest operating costs compared to income?", "kpi": "efficiency_ratio"}
+{"question": "Rank banks by expenses as a share of revenue", "kpi": "efficiency_ratio"}
+{"question": "How profitable is each bank relative to its balance sheet size?", "kpi": "return_on_assets"}
+{"question": "Which banks earn the most net income per dollar of assets?", "kpi": "return_on_assets"}
+{"question": "What return are shareholders getting on their capital?", "kpi": "return_on_equity"}
+{"question": "Which banks generate the most profit relative to book equity?", "kpi": "return_on_equity"}
+{"question": "Are any banks lending out more than they hold in deposits?", "kpi": "loan_to_deposit_ratio"}
+{"question": "How much of their deposit base have banks put to work as loans?", "kpi": "loan_to_deposit_ratio"}
+{"question": "Which banks are best capitalized against their risk exposure?", "kpi": "tier1_capital_ratio"}
+{"question": "Is any bank close to the regulatory minimum for core capital?", "kpi": "tier1_capital_ratio"}
+{"question": "Which banks have the most loans that stopped paying?", "kpi": "npl_ratio"}
+{"question": "Where is credit deterioration worst, measured by delinquent loans?", "kpi": "npl_ratio"}
+{"question": "What share of the loan book is past due 90 days or on nonaccrual?", "kpi": "npl_ratio"}
+{"question": "How leveraged are the banks, comparing equity to total assets?", "kpi": "equity_to_assets"}
+{"question": "Which banks have the thickest equity cushion relative to their balance sheet?", "kpi": "equity_to_assets"}
+{"question": "Which banks convert revenue into profit most efficiently on their assets?", "kpi": "return_on_assets"}
