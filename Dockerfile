@@ -8,7 +8,7 @@ WORKDIR /app
 COPY pyproject.toml README.md ./
 COPY bank_agent ./bank_agent
 COPY eval ./eval
-RUN pip install --no-cache-dir ".[local]"
+RUN pip install --no-cache-dir -e ".[local]"
 
 # Build the sample warehouse at image build time so the container starts ready.
 RUN python -m bank_agent.cli build

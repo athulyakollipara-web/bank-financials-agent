@@ -5,9 +5,9 @@
 
 Ask plain-English questions about US bank financials and get answers backed by validated SQL:
 
-> *"Which 5 banks in MA had the highest net interest margin last quarter?"*
-> *"Which banks had the largest quarter-over-quarter deposit growth in 2025Q2?"*
-> *"List banks in TX with a tier 1 capital ratio below 10%."*
+- *"Which 5 banks in MA had the highest net interest margin last quarter?"*
+- *"Which banks had the largest quarter-over-quarter deposit growth in 2025Q2?"*
+- *"List banks in TX with a tier 1 capital ratio below 10%."*
 
 The agent never guesses formulas. KPIs like NIM, efficiency ratio and Tier 1 ratio come from a **governed semantic layer**, every query is **structurally validated with SQLGlot** before it runs, and every number in the answer is **checked against the query result**. It runs as a REST API, as an **MCP server** you can plug into Claude Desktop, and deploys to AWS with one CDK command.
 
@@ -69,7 +69,7 @@ cd bank-financials-agent
 make setup && source .venv/bin/activate
 
 make build     # generate sample data, run bronze/silver/gold, run quality checks
-make test      # 36 tests: pipeline, validator, retrieval, agent loop, API, MCP, CDK
+make test      # 41 tests: pipeline, validator, retrieval, agent loop, Bedrock API contract, API, MCP, CDK
 make serve     # http://localhost:8000/docs
 ```
 
@@ -131,7 +131,9 @@ make eval            # replay LLM: must be 100%. Proves every reference query va
 make eval-bedrock    # real accuracy with Bedrock; fails below 85%
 ```
 
-<!-- BEDROCK_RESULTS: replace this comment with the table from eval/results/bedrock-*.md after running `make eval-bedrock` -->
+<!-- BEDROCK_RESULTS: replace this comment with the table from the "Bedrock benchmark" workflow run summary -->
+
+You can also run it without a local setup: **Actions → bedrock-benchmark → Run workflow**. It needs the repository secrets `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` for an IAM user allowed to call `bedrock:InvokeModel` / `bedrock:Converse` (policy in `docs/bedrock-eval-iam-policy.json`). The result table appears on the run's summary page and is attached as an artifact.
 
 Each run logs accuracy, first-attempt accuracy, accuracy per category, numeric groundedness and latency to MLflow (`mlflow ui`).
 
@@ -174,7 +176,7 @@ bank_agent/
   mcp_server.py  MCP tools
 eval/            benchmark builder, NL2SQL eval (MLflow), retrieval eval
 infra/           CDK stack + Glue entry point
-tests/           36 tests
+tests/           41 tests
 ```
 
 ## Data note
